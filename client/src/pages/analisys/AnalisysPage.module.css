@@ -3,32 +3,23 @@
   width: 100%;
   min-height: 100vh;
   margin: 0;
-  padding: 32px 24px 48px;
   background: #121212;
   color: #e5e5e5;
 }
 
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr 240px;
-  gap: 16px;
+  grid-template-columns: 360px minmax(0, 1fr) 240px;
+  gap: 8px;
   align-items: stretch;
+  transition: grid-template-columns 0.25s ease;
+  min-height: 100vh;
 }
 
 .centerPane {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.fullImage {
-  display: block;
-  width: 100%;
-  height: calc(100vh - 80px);
-  object-fit: contain;
-  border-radius: var(--radius-md);
-  background: #1d1d1d;
-  border: 1px solid #2a2a2a;
 }
 
 .empty {

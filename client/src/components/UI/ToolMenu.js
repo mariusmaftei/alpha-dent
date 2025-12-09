@@ -53,42 +53,93 @@ function ToolMenu({
   onLegend,
   onResults,
   onNewAnalysis,
+  resultsCount,
 }) {
   return (
     <aside className={styles.menu}>
       <div className={styles.header}>{title}</div>
 
-      <div className={styles.topActions}>
-        <button className={styles.topButton} type="button" onClick={onLegend}>
-          <LegendIcon />
-          <span>Legend</span>
-        </button>
-        <button className={styles.topButton} type="button" onClick={onResults}>
-          <ResultsIcon />
-          <span>Results</span>
-        </button>
-        <button className={styles.topButton} type="button" onClick={onNewAnalysis}>
-          <NewIcon />
-          <span>New analysis</span>
-        </button>
+      <div className={styles.section}>
+        <div className={styles.sectionLabel}>Navigation</div>
+        <div className={styles.topActions}>
+          <button className={styles.linkButton} type="button" onClick={onLegend}>
+            <div className={styles.buttonContent}>
+              <LegendIcon />
+              <span>Legend</span>
+            </div>
+          </button>
+          <button className={styles.linkButton} type="button" onClick={onResults}>
+            <div className={styles.buttonContent}>
+              <ResultsIcon />
+              <span>Results</span>
+            </div>
+            {resultsCount !== undefined && (
+              <span className={styles.badge}>{resultsCount}</span>
+            )}
+          </button>
+          <button className={styles.linkButton} type="button" onClick={onNewAnalysis}>
+            <div className={styles.buttonContent}>
+              <NewIcon />
+              <span>New analysis</span>
+            </div>
+          </button>
+        </div>
       </div>
 
-      <div className={styles.actions}>
+      <hr className={styles.rule} />
+
+      <div className={styles.section}>
+        <div className={styles.sectionLabel}>Tools</div>
+        <div className={styles.actions}>
         {actions.length === 0 ? (
           <div className={styles.empty}>No tools</div>
         ) : (
-          actions.map((action) => (
-            <button
-              key={action.id || action.label}
-              className={styles.button}
-              type="button"
-              onClick={action.onClick}
-            >
-              <span>{action.label}</span>
-              {action.meta && <small>{action.meta}</small>}
-            </button>
-          ))
+          actions.map((action) =>
+            action.type === "slider" ? (
+              <div key={action.id || action.label} className={styles.sliderRow}>
+                <div className={styles.sliderHeader}>
+                  {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
+                  <div className={styles.actionText}>
+                    <span className={styles.actionLabel}>{action.label}</span>
+                  </div>
+                  <span className={styles.sliderValue}>
+                    {action.displayValue
+                      ? action.displayValue(action.value)
+                      : `${action.value}${action.unit || ""}`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={action.min}
+                  max={action.max}
+                  step={action.step || 1}
+                  value={action.value}
+                  onChange={(e) => action.onChange?.(Number(e.target.value))}
+                  className={styles.slider}
+                />
+              </div>
+            ) : (
+              <button
+                key={action.id || action.label}
+                className={
+                  action.variant === "solid"
+                    ? styles.primaryButton
+                    : styles.linkButton
+                }
+                type="button"
+                onClick={action.onClick}
+              >
+                <div className={styles.buttonContent}>
+                  {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
+                  <span className={styles.actionText}>
+                    <span className={styles.actionLabel}>{action.label}</span>
+                  </span>
+                </div>
+              </button>
+            )
+          )
         )}
+        </div>
       </div>
     </aside>
   );

@@ -1,86 +1,188 @@
 .menu {
   width: 240px;
-  min-height: calc(100vh - 80px);
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: linear-gradient(155deg, #1c1c1c, #101010);
+  border: 1px solid #2e2e2e;
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
   color: #e5e5e5;
+  margin-right: 0;
+  overflow: hidden;
 }
 
 .header {
   font-weight: 700;
   font-size: 14px;
-  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2a2a;
   letter-spacing: 0.3px;
 }
 
 .topActions {
   display: grid;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 4px;
+  padding-bottom: 4px;
 }
 
-.topButton {
+.linkButton {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #2f2f2f;
-  background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
-  color: #f4f4f4;
+  padding: 8px 6px;
+  border: none;
+  background: transparent;
+  color: #e5e5e5;
   cursor: pointer;
   text-align: left;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+  position: relative;
 }
 
-.topButton:hover {
-  border-color: #3a7adf;
-  background: linear-gradient(135deg, #323232, #222222);
+.buttonContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
 }
 
-.topButton svg {
+.linkButton:hover {
+  background: rgba(58, 122, 223, 0.12);
+  color: #9ec7ff;
+}
+
+.linkButton small {
+  color: #b5b5b5;
+}
+
+.linkButton svg {
   width: 16px;
   height: 16px;
 }
 
-.actions {
-  display: grid;
-  gap: 8px;
+.badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #2a2a2a;
+  color: #e5e5e5;
+  font-weight: 600;
+  font-size: 11px;
+  border: 1px solid #3a3a3a;
+  flex-shrink: 0;
 }
 
-.button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #2f2f2f;
-  background: #202020;
+.actionIcon {
+  width: 18px;
+  height: 18px;
   color: #e5e5e5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.actionLabel {
+  font-weight: 600;
+}
+
+.actionMeta {
+  color: #a8b4c4;
+  font-size: 12px;
+}
+
+.primaryButton {
+  width: 100%;
+  padding: 8px;
+  border-radius: 9px;
+  border: 1px solid #3a3a3a;
+  background: linear-gradient(135deg, #222222, #1a1a1a);
+  color: #f5f5f5;
   text-align: left;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  gap: 10px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    border-color 0.12s ease;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
 }
 
-.button:hover {
-  border-color: #3a7adf;
-  background: #252525;
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  border-color: #4a4a4a;
 }
 
-.button small {
-  color: #b5b5b5;
+.rule {
+  border: none;
+  border-top: 1px solid #2a2a2a;
+  margin: 12px 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 4px;
+}
+
+.actions {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  grid-auto-rows: min-content;
+  overflow-y: auto;
+  padding-right: 2px;
+  min-height: 0;
+  flex: 1;
+}
+
+.sliderRow {
+  padding: 4px 0;
+  display: grid;
+  gap: 6px;
+}
+
+.sliderHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sliderValue {
+  margin-left: auto;
+  color: #e5e5e5;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.slider {
+  width: 100%;
+  accent-color: #d1d5db;
 }
 
 .empty {
-  padding: 12px;
-  border: 1px dashed #3a3a3a;
-  border-radius: 10px;
+  padding: 8px 4px;
   color: #b0b0b0;
-  text-align: center;
+  text-align: left;
 }
-

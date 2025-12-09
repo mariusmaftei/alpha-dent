@@ -1,0 +1,19 @@
+.wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image {
+  display: block;
+}
+
+.lens {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 2px solid #3a7adf;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
