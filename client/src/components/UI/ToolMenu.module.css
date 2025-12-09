@@ -13,6 +13,8 @@
   color: #e5e5e5;
   margin-right: 0;
   overflow: hidden;
+  position: relative;
+  z-index: 100;
 }
 
 .header {
@@ -54,8 +56,17 @@
 }
 
 .linkButton:hover {
-  background: rgba(58, 122, 223, 0.12);
-  color: #9ec7ff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.linkButton.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e5e5e5;
+  font-weight: 600;
+}
+
+.linkButton.active:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .linkButton small {
@@ -185,4 +196,54 @@
   padding: 8px 4px;
   color: #b0b0b0;
   text-align: left;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.categoryHeader {
+  width: 100%;
+  padding: 8px 6px;
+  border: none;
+  background: transparent;
+  color: #e5e5e5;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.categoryHeader:hover {
+  background: rgba(58, 122, 223, 0.12);
+  color: #9ec7ff;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: #888;
+}
+
+.submenu {
+  display: grid;
+  gap: 4px;
+  padding-left: 24px;
+  margin-top: 4px;
+}
+
+.actionMeta {
+  font-size: 11px;
+  color: #b5b5b5;
+  font-weight: normal;
+  display: block;
+  margin-top: 2px;
 }

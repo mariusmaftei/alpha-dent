@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./ToolMenu.module.css";
 
 const LegendIcon = () => (
@@ -47,14 +47,91 @@ const NewIcon = () => (
   </svg>
 );
 
+const ChevronIcon = ({ expanded }) => (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    className={styles.chevron}
+    style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
+  >
+    <path
+      d="M9 18l6-6-6-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 function ToolMenu({
   title = "Tools",
-  actions = [],
+  categories = [],
   onLegend,
   onResults,
   onNewAnalysis,
   resultsCount,
 }) {
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  const toggleCategory = (categoryId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
+    }));
+  };
+
+  const renderAction = (action) => {
+    if (action.type === "slider") {
+  return (
+              <div key={action.id || action.label} className={styles.sliderRow}>
+                <div className={styles.sliderHeader}>
+                  {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
+                  <div className={styles.actionText}>
+                    <span className={styles.actionLabel}>{action.label}</span>
+                  </div>
+                  <span className={styles.sliderValue}>
+                    {action.displayValue
+                      ? action.displayValue(action.value)
+                      : `${action.value}${action.unit || ""}`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={action.min}
+                  max={action.max}
+                  step={action.step || 1}
+                  value={action.value}
+                  onChange={(e) => action.onChange?.(Number(e.target.value))}
+                  className={styles.slider}
+                />
+              </div>
+      );
+    }
+
+    return (
+              <button
+                key={action.id || action.label}
+        className={`${
+                  action.variant === "solid"
+                    ? styles.primaryButton
+                    : styles.linkButton
+        } ${action.isActive ? styles.active : ""}`}
+                type="button"
+                onClick={action.onClick}
+              >
+        <div className={styles.buttonContent}>
+                {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
+                <span className={styles.actionText}>
+                  <span className={styles.actionLabel}>{action.label}</span>
+            {action.meta && <span className={styles.actionMeta}>{action.meta}</span>}
+          </span>
+        </div>
+      </button>
+    );
+  };
+
   return (
     <aside className={styles.menu}>
       <div className={styles.header}>{title}</div>
@@ -91,53 +168,36 @@ function ToolMenu({
       <div className={styles.section}>
         <div className={styles.sectionLabel}>Tools</div>
         <div className={styles.actions}>
-        {actions.length === 0 ? (
-          <div className={styles.empty}>No tools</div>
-        ) : (
-          actions.map((action) =>
-            action.type === "slider" ? (
-              <div key={action.id || action.label} className={styles.sliderRow}>
-                <div className={styles.sliderHeader}>
-                  {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
-                  <div className={styles.actionText}>
-                    <span className={styles.actionLabel}>{action.label}</span>
-                  </div>
-                  <span className={styles.sliderValue}>
-                    {action.displayValue
-                      ? action.displayValue(action.value)
-                      : `${action.value}${action.unit || ""}`}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={action.min}
-                  max={action.max}
-                  step={action.step || 1}
-                  value={action.value}
-                  onChange={(e) => action.onChange?.(Number(e.target.value))}
-                  className={styles.slider}
-                />
-              </div>
-            ) : (
-              <button
-                key={action.id || action.label}
-                className={
-                  action.variant === "solid"
-                    ? styles.primaryButton
-                    : styles.linkButton
-                }
-                type="button"
-                onClick={action.onClick}
-              >
-                <div className={styles.buttonContent}>
-                  {action.icon && <span className={styles.actionIcon}>{action.icon}</span>}
-                  <span className={styles.actionText}>
-                    <span className={styles.actionLabel}>{action.label}</span>
-                  </span>
-                </div>
+          {categories.length === 0 ? (
+            <div className={styles.empty}>No tools</div>
+          ) : (
+            categories.map((category) => {
+              const isExpanded = expandedCategories[category.id];
+              return (
+                <div key={category.id} className={styles.category}>
+                  <button
+                    className={styles.categoryHeader}
+                    type="button"
+                    onClick={() => toggleCategory(category.id)}
+                  >
+                    <div className={styles.buttonContent}>
+                      {category.icon && (
+                        <span className={styles.actionIcon}>{category.icon}</span>
+                      )}
+                      <span className={styles.actionText}>
+                        <span className={styles.actionLabel}>{category.label}</span>
+                </span>
+                    </div>
+                    <ChevronIcon expanded={isExpanded} />
               </button>
-            )
-          )
+                  {isExpanded && category.items && category.items.length > 0 && (
+                    <div className={styles.submenu}>
+                      {category.items.map((action) => renderAction(action))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
         )}
         </div>
       </div>
@@ -146,4 +206,3 @@ function ToolMenu({
 }
 
 export default ToolMenu;
-

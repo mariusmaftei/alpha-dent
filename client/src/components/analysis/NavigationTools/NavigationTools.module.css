@@ -1,0 +1,49 @@
+.panLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  border-radius: 8px;
+  z-index: 20;
+}
+
+.controlButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #444;
+  background: #222;
+  color: #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.controlButton:hover {
+  background: #333;
+  border-color: #555;
+}
+
+.zoomValue {
+  min-width: 50px;
+  text-align: center;
+  color: #e5e5e5;
+  font-size: 13px;
+  font-weight: 600;
+}
+

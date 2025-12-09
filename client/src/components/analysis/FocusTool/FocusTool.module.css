@@ -4,6 +4,7 @@
   max-width: 90vw;
   max-height: 80vh;
   overflow: hidden;
+  z-index: 1;
 }
 
 .fullImage {

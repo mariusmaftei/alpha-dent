@@ -1,23 +1,64 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import Magnifier from "../Magnifier";
-import styles from "./index.module.css";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
+import Magnifier from "../Magnifier/Magnifier";
+import MeasurementTools from "../MeasurementTools/MeasurementTools";
+import AnnotationTools from "../AnnotationTools/AnnotationTools";
+import NavigationTools from "../NavigationTools/NavigationTools";
+import styles from "./FocusTool.module.css";
 
-function ImageCanvas({
-  image,
-  name,
-  boxes = [],
-  showMagnifier,
-  lensSize,
-  lensZoom,
-  selectMode,
-  cropRect,
-  onCrop,
-  onToggleBoxVisibility,
-}) {
+const FocusTool = forwardRef(function FocusTool(
+  {
+    image,
+    name,
+    boxes = [],
+    showMagnifier,
+    lensSize,
+    lensZoom,
+    selectMode,
+    cropRect,
+    onCrop,
+    onToggleBoxVisibility,
+    activeMeasurementTool = "none",
+    measurementColor = "#3b82f6",
+    activeAnnotationTool = "none",
+    annotationColor = "#3b82f6",
+    annotationStrokeWidth = 2,
+    zoom = 1,
+    onZoomChange,
+    panOffset = { x: 0, y: 0 },
+    onPanChange,
+    brightness = 0,
+    contrast = 0,
+    sharpness = 0,
+    colorFilter = "none",
+  },
+  ref
+) {
   const imgElRef = useRef(null);
+  const measurementToolsRef = useRef(null);
+  const annotationToolsRef = useRef(null);
   const [selectionRect, setSelectionRect] = useState(null);
   const [selecting, setSelecting] = useState(false);
   const [startPoint, setStartPoint] = useState(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      clearMeasurements: () => {
+        measurementToolsRef.current?.clearMeasurements();
+      },
+      clearAnnotations: () => {
+        annotationToolsRef.current?.clearAnnotations();
+      },
+    }),
+    []
+  );
 
   const toPercentRect = (start, current, rect) => {
     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -132,6 +173,32 @@ function ImageCanvas({
   const activeClip = cropRect || null;
   const showSelectionBox = (selecting || selectionRect) && selectionRect;
 
+  const enhancedStyle = useMemo(() => {
+    const filters = [];
+    if (brightness !== 0) filters.push(`brightness(${1 + brightness / 100})`);
+    if (contrast !== 0) filters.push(`contrast(${1 + contrast / 100})`);
+    if (sharpness !== 0) {
+      const amount = sharpness / 100;
+      filters.push(`contrast(${1 + amount * 0.5})`);
+    }
+    if (colorFilter === "grayscale") filters.push("grayscale(100%)");
+    else if (colorFilter === "sepia") filters.push("sepia(100%)");
+    else if (colorFilter === "invert") filters.push("invert(100%)");
+    return { filter: filters.length > 0 ? filters.join(" ") : "none" };
+  }, [brightness, contrast, sharpness, colorFilter]);
+
+  const imageStyle = useMemo(() => {
+    const baseStyle = {
+      ...activeClip,
+      ...focusStyle,
+      transform: `translate(${panOffset.x}px, ${
+        panOffset.y
+      }px) scale(${zoom}) ${focusStyle.transform || ""}`,
+      transformOrigin: "center center",
+    };
+    return { ...baseStyle, ...enhancedStyle };
+  }, [activeClip, focusStyle, panOffset, zoom, enhancedStyle]);
+
   return (
     <div className={styles.imageWrapper}>
       {showMagnifier ? (
@@ -142,9 +209,12 @@ function ImageCanvas({
           size={lensSize}
           imageClassName={styles.fullImage}
           imageRef={imgElRef}
-          style={{ ...activeClip, ...focusStyle }}
+          style={imageStyle}
         >
-          <div className={styles.boxLayer} style={{ ...activeClip, ...focusStyle }}>
+          <div
+            className={styles.boxLayer}
+            style={{ ...activeClip, ...focusStyle }}
+          >
             {renderBoxes()}
           </div>
         </Magnifier>
@@ -155,17 +225,49 @@ function ImageCanvas({
             alt={name || "Uploaded intraoral"}
             className={styles.fullImage}
             ref={imgElRef}
-            style={{ ...activeClip, ...focusStyle }}
+            style={imageStyle}
           />
-          <div className={styles.boxLayer} style={{ ...activeClip, ...focusStyle }}>
+          <div
+            className={styles.boxLayer}
+            style={{ ...activeClip, ...focusStyle }}
+          >
             {renderBoxes()}
           </div>
         </>
       )}
 
+      <MeasurementTools
+        ref={measurementToolsRef}
+        activeTool={activeMeasurementTool}
+        imageRef={imgElRef}
+        color={measurementColor}
+      />
+
+      <AnnotationTools
+        ref={annotationToolsRef}
+        activeTool={activeAnnotationTool}
+        imageRef={imgElRef}
+        color={annotationColor}
+        strokeWidth={annotationStrokeWidth}
+      />
+
+      <NavigationTools
+        imageRef={imgElRef}
+        zoom={zoom}
+        onZoomChange={onZoomChange}
+        onPanChange={onPanChange}
+      />
+
       <div
         className={styles.selectionLayer}
-        style={{ pointerEvents: selectMode ? "auto" : "none" }}
+        style={{
+          pointerEvents:
+            selectMode &&
+            activeMeasurementTool === "none" &&
+            activeAnnotationTool === "none"
+              ? "auto"
+              : "none",
+        }}
         onMouseDown={handleSelectStart}
         onMouseMove={handleSelectMove}
         onMouseUp={handleSelectEnd}
@@ -184,7 +286,8 @@ function ImageCanvas({
       </div>
     </div>
   );
-}
+});
 
-export default ImageCanvas;
+FocusTool.displayName = "FocusTool";
 
+export default FocusTool;

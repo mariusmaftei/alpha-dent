@@ -11,6 +11,8 @@
   transition: opacity 0.2s ease, transform 0.25s ease;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 100;
 }
 
 .collapsed {

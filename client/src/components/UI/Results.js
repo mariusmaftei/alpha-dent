@@ -2,9 +2,12 @@ import React, { useMemo, useState } from "react";
 import { FaTooth } from "react-icons/fa";
 import styles from "./Results.module.css";
 
-function Results({ items = [], collapsed = false, onToggleBox }) {
+function Results({ items = [], collapsed = false, onToggleBox, onShowAll, onHideAll }) {
   const [classFilter, setClassFilter] = useState("all");
   const [scoreFilter, setScoreFilter] = useState("all");
+  
+  const allVisible = items.length > 0 && items.every((item) => !item.hidden);
+  const allHidden = items.length > 0 && items.every((item) => item.hidden);
 
   const classOptions = useMemo(
     () => ["all", ...Array.from(new Set(items.map((i) => i.label)))],
@@ -57,6 +60,28 @@ function Results({ items = [], collapsed = false, onToggleBox }) {
             <option value="85">≥ 85%</option>
           </select>
         </label>
+        {(onShowAll || onHideAll) && (
+          <div className={styles.actions}>
+            {!allVisible && onShowAll && (
+              <button
+                className={styles.actionButton}
+                onClick={onShowAll}
+                type="button"
+              >
+                Show All
+              </button>
+            )}
+            {!allHidden && onHideAll && (
+              <button
+                className={styles.actionButton}
+                onClick={onHideAll}
+                type="button"
+              >
+                Hide All
+              </button>
+            )}
+          </div>
+        )}
       </div>
       <div className={styles.list}>
         {filteredItems.length === 0 ? (
