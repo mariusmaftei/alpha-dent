@@ -1,0 +1,86 @@
+.menu {
+  width: 240px;
+  min-height: calc(100vh - 80px);
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  color: #e5e5e5;
+}
+
+.header {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.topActions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.topButton {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #2f2f2f;
+  background: linear-gradient(135deg, #2a2a2a, #1f1f1f);
+  color: #f4f4f4;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.topButton:hover {
+  border-color: #3a7adf;
+  background: linear-gradient(135deg, #323232, #222222);
+}
+
+.topButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+}
+
+.button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #2f2f2f;
+  background: #202020;
+  color: #e5e5e5;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.button:hover {
+  border-color: #3a7adf;
+  background: #252525;
+}
+
+.button small {
+  color: #b5b5b5;
+}
+
+.empty {
+  padding: 12px;
+  border: 1px dashed #3a3a3a;
+  border-radius: 10px;
+  color: #b0b0b0;
+  text-align: center;
+}
+

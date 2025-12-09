@@ -1,0 +1,60 @@
+.sidebar {
+  width: 240px;
+  min-height: calc(100vh - 80px);
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  color: #e5e5e5;
+}
+
+.header {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  padding: 10px;
+  border: 1px solid #2f2f2f;
+  border-radius: 10px;
+  background: #202020;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.item small {
+  color: #b5b5b5;
+}
+
+.empty {
+  padding: 12px;
+  border: 1px dashed #3a3a3a;
+  border-radius: 10px;
+  color: #b0b0b0;
+  text-align: center;
+}
+
