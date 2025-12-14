@@ -94,7 +94,16 @@ server/coverage/
 *.tgz
 *.gz
 
- 
+# AI/ML Training files and datasets
+AlphaDent/
+app/runs/
+app/docs/
+app/*.pt
+app/*.pth
+app/*.onnx
+app/weights/
+app/*weights/
+
 # Binaries
 *.exe
 *.out

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { FaTooth } from "react-icons/fa";
 import styles from "./Results.module.css";
 
-function Results({ items = [], collapsed = false, onToggleBox, onShowAll, onHideAll }) {
+function Results({ items = [], collapsed = false, onToggleBox, onShowAll, onHideAll, onExport, imageName }) {
   const [classFilter, setClassFilter] = useState("all");
   const [scoreFilter, setScoreFilter] = useState("all");
   
@@ -60,7 +60,7 @@ function Results({ items = [], collapsed = false, onToggleBox, onShowAll, onHide
             <option value="85">≥ 85%</option>
           </select>
         </label>
-        {(onShowAll || onHideAll) && (
+        {(onShowAll || onHideAll || onExport) && (
           <div className={styles.actions}>
             {!allVisible && onShowAll && (
               <button
@@ -78,6 +78,16 @@ function Results({ items = [], collapsed = false, onToggleBox, onShowAll, onHide
                 type="button"
               >
                 Hide All
+              </button>
+            )}
+            {onExport && items.length > 0 && (
+              <button
+                className={styles.actionButton}
+                onClick={onExport}
+                type="button"
+                style={{ marginTop: "8px", width: "100%" }}
+              >
+                Export CSV
               </button>
             )}
           </div>

@@ -1,0 +1,30 @@
+# AlphaDent Dataset Configuration
+# Copy this file to data.yaml and update the path
+
+# Dataset root path (absolute or relative to this file)
+path: /path/to/AlphaDent
+
+# Training images (relative to path)
+train: images/train
+
+# Validation images (relative to path)
+val: images/valid
+
+# Test images (relative to path) - optional
+test: images/test
+
+# Number of classes
+nc: 9
+
+# Class names
+names:
+  0: Abrasion
+  1: Filling
+  2: Crown
+  3: Caries Class 1
+  4: Caries Class 2
+  5: Caries Class 3
+  6: Caries Class 4
+  7: Caries Class 5
+  8: Caries Class 6
+

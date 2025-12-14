@@ -49,6 +49,12 @@
   gap: 6px;
 }
 
+.polygonOverlay {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .badgeClose {
   width: 18px;
   height: 18px;

@@ -1,0 +1,45 @@
+========================================
+  HOW TO START THE SERVER - SUPER EASY!
+========================================
+
+METHOD 1: PowerShell Script (EASIEST!)
+----------------------------------------
+1. Open PowerShell
+2. Navigate to the "app" folder:
+   
+   cd C:\Users\Marius Maftei\Desktop\Development\alpha-dent\app
+
+3. Run the script:
+   
+   .\start.ps1
+
+   That's it!
+
+
+METHOD 2: Direct Command
+----------------------------------
+1. Open PowerShell
+2. Type this EXACTLY (copy and paste):
+   
+   cd C:\Users\Marius Maftei\Desktop\Development\alpha-dent\app
+
+3. Press Enter
+
+4. Type this EXACTLY:
+   
+   .\venv\Scripts\python.exe main.py
+
+5. Press Enter
+
+IMPORTANT: 
+- You MUST be in the "app" folder (where main.py is)
+- You MUST use .\venv\Scripts\python.exe (not just "python")
+
+
+If you see errors, make sure:
+✓ You're in the "app" folder (not venv, not Scripts)
+✓ You're using .\venv\Scripts\python.exe
+✓ The venv folder exists
+
+========================================
+

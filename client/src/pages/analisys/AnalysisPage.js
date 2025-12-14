@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaTooth } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { analyzeImage } from "../../services/api";
 import {
   faMagnifyingGlass,
   faSearchPlus,
@@ -30,6 +31,8 @@ import FocusTool from "../../components/analysis/FocusTool/FocusTool";
 import Legend from "../../components/UI/Legend";
 import Results from "../../components/UI/Results";
 import ToolMenu from "../../components/UI/ToolMenu";
+import AnalyzingOverlay from "../../components/UI/AnalyzingOverlay";
+import ToastContainer from "../../components/UI/ToastContainer";
 import styles from "./AnalisysPage.module.css";
 
 const legendItems = [
@@ -132,28 +135,108 @@ function AnalysisPage() {
   const navigate = useNavigate();
   const image = state?.image;
   const name = state?.name;
+  const initialPredictions = state?.predictions;
   const focusToolRef = useRef(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelMode, setPanelMode] = useState("legend"); // legend | results
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [lensSize, setLensSize] = useState(160);
   const [lensZoom, setLensZoom] = useState(2);
-  const [detections] = useState(initialDetections);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [detections, setDetections] = useState(() => {
+    if (initialPredictions && Array.isArray(initialPredictions)) {
+      return initialPredictions.map((pred, index) => {
+        let polygon = null;
+        if (pred.polygon && Array.isArray(pred.polygon)) {
+          if (pred.polygon.length > 0 && typeof pred.polygon[0] === 'number') {
+            const coords = pred.polygon;
+            polygon = [];
+            for (let i = 0; i < coords.length; i += 2) {
+              polygon.push({
+                x: coords[i] * 100,
+                y: coords[i + 1] * 100,
+              });
+            }
+          } else {
+            polygon = pred.polygon.map(p => ({
+              x: (typeof p === 'number' ? p : p.x) * 100,
+              y: (typeof p === 'number' ? p : p.y) * 100,
+            }));
+          }
+        }
+        
+        const bbox = pred.bbox || pred.box || { x: 0, y: 0, w: 0.1, h: 0.1 };
+        const normalizedBbox = {
+          x: (typeof bbox.x === 'number' && bbox.x <= 1) ? bbox.x * 100 : bbox.x,
+          y: (typeof bbox.y === 'number' && bbox.y <= 1) ? bbox.y * 100 : bbox.y,
+          w: (typeof bbox.w === 'number' && bbox.w <= 1) ? bbox.w * 100 : bbox.w,
+          h: (typeof bbox.h === 'number' && bbox.h <= 1) ? bbox.h * 100 : bbox.h,
+        };
+        
+        const normalizedBboxOriginal = {
+          x: (typeof bbox.x === 'number' && bbox.x <= 1) ? bbox.x : bbox.x / 100,
+          y: (typeof bbox.y === 'number' && bbox.y <= 1) ? bbox.y : bbox.y / 100,
+          w: (typeof bbox.w === 'number' && bbox.w <= 1) ? bbox.w : bbox.w / 100,
+          h: (typeof bbox.h === 'number' && bbox.h <= 1) ? bbox.h : bbox.h / 100,
+        };
+        
+        return {
+          id: `d${index + 1}`,
+          classId: pred.class_id.toString(),
+          label: pred.class_name || `Class ${pred.class_id}`,
+          color: legendItems.find(item => item.id === pred.class_id.toString())?.color || "#6b7280",
+          conf: pred.confidence,
+          box: normalizedBbox,
+          boxNormalized: normalizedBboxOriginal,
+          polygon: polygon,
+        };
+      });
+    }
+    return initialDetections.map(d => ({
+      ...d,
+      boxNormalized: {
+        x: d.box.x / 100,
+        y: d.box.y / 100,
+        w: d.box.w / 100,
+        h: d.box.h / 100,
+      }
+    }));
+  });
   const [hiddenBoxIds, setHiddenBoxIds] = useState([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.onload = () => {
+        setImageDimensions({ width: img.naturalWidth || img.width, height: img.naturalHeight || img.height });
+      };
+      img.src = image;
+    }
+  }, [image]);
+  
   const resultsItems = useMemo(
     () =>
-      detections.map((d) => ({
-        id: d.id,
-        label: d.label,
-        color: d.color,
-        meta: `${(d.conf * 100).toFixed(0)}%`,
-        description: `Confidence ${(d.conf * 100).toFixed(0)}%. Region ${
-          d.box.w
-        }×${d.box.h} px.`,
-        score: d.conf,
-        hidden: hiddenBoxIds.includes(d.id),
-      })),
-    [detections, hiddenBoxIds]
+      detections.map((d) => {
+        const pixelWidth = imageDimensions.width > 0 
+          ? Math.round((d.boxNormalized?.w || d.box.w / 100) * imageDimensions.width)
+          : Math.round(d.box.w);
+        const pixelHeight = imageDimensions.height > 0
+          ? Math.round((d.boxNormalized?.h || d.box.h / 100) * imageDimensions.height)
+          : Math.round(d.box.h);
+        
+        return {
+          id: d.id,
+          label: d.label,
+          color: d.color,
+          meta: `${(d.conf * 100).toFixed(0)}%`,
+          description: `Confidence ${(d.conf * 100).toFixed(0)}%. Region ${pixelWidth}×${pixelHeight} px.`,
+          score: d.conf,
+          hidden: hiddenBoxIds.includes(d.id),
+        };
+      }),
+    [detections, hiddenBoxIds, imageDimensions]
   );
 
   const toggleBoxVisibility = (id) => {
@@ -168,6 +251,140 @@ function AnalysisPage() {
 
   const hideAllBoxes = () => {
     setHiddenBoxIds(detections.map((d) => d.id));
+  };
+
+  const showToast = (message, type = "error", duration = 5000) => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
+  const exportToCSV = () => {
+    try {
+      const patientId = name ? name.replace(/\.[^/.]+$/, "") : "test_image";
+      const csvRows = ["patient_id,class_id,confidence,poly"];
+      
+      detections.forEach((detection) => {
+        const classId = detection.classId;
+        const confidence = detection.conf.toFixed(6);
+        let poly;
+        
+        if (detection.polygon && Array.isArray(detection.polygon) && detection.polygon.length > 0) {
+          poly = detection.polygon.map(p => {
+            const x = (typeof p === 'object' ? p.x : p) / 100;
+            const y = (typeof p === 'object' ? p.y : p) / 100;
+            return `${x.toFixed(6)} ${y.toFixed(6)}`;
+          }).join(" ");
+        } else {
+          const box = detection.box;
+          const x1 = box.x / 100;
+          const y1 = box.y / 100;
+          const x2 = (box.x + box.w) / 100;
+          const y2 = box.y / 100;
+          const x3 = (box.x + box.w) / 100;
+          const y3 = (box.y + box.h) / 100;
+          const x4 = box.x / 100;
+          const y4 = (box.y + box.h) / 100;
+          poly = `${x1.toFixed(6)} ${y1.toFixed(6)} ${x2.toFixed(6)} ${y2.toFixed(6)} ${x3.toFixed(6)} ${y3.toFixed(6)} ${x4.toFixed(6)} ${y4.toFixed(6)}`;
+        }
+        csvRows.push(`${patientId},${classId},${confidence},"${poly}"`);
+      });
+
+      const csvContent = csvRows.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${patientId}_results.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast("CSV exported successfully!", "success", 3000);
+    } catch (error) {
+      showToast("Failed to export CSV: " + error.message, "error");
+    }
+  };
+
+  const handleAnalyzeImage = async (imageFile) => {
+    if (!imageFile) {
+      showToast("Please select an image file", "error");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const data = await analyzeImage(imageFile);
+      
+      if (data.predictions && Array.isArray(data.predictions)) {
+        const formattedDetections = data.predictions.map((pred, index) => {
+          let polygon = null;
+          if (pred.polygon && Array.isArray(pred.polygon)) {
+            if (pred.polygon.length > 0 && typeof pred.polygon[0] === 'number') {
+              const coords = pred.polygon;
+              polygon = [];
+              for (let i = 0; i < coords.length; i += 2) {
+                polygon.push({
+                  x: coords[i] * 100,
+                  y: coords[i + 1] * 100,
+                });
+              }
+            } else {
+              polygon = pred.polygon.map(p => ({
+                x: (typeof p === 'number' ? p : p.x) * 100,
+                y: (typeof p === 'number' ? p : p.y) * 100,
+              }));
+            }
+          }
+          
+          const bbox = pred.bbox || pred.box || { x: 0, y: 0, w: 0.1, h: 0.1 };
+          const normalizedBbox = {
+            x: (typeof bbox.x === 'number' && bbox.x <= 1) ? bbox.x * 100 : bbox.x,
+            y: (typeof bbox.y === 'number' && bbox.y <= 1) ? bbox.y * 100 : bbox.y,
+            w: (typeof bbox.w === 'number' && bbox.w <= 1) ? bbox.w * 100 : bbox.w,
+            h: (typeof bbox.h === 'number' && bbox.h <= 1) ? bbox.h * 100 : bbox.h,
+          };
+          
+          const normalizedBboxOriginal = {
+            x: (typeof bbox.x === 'number' && bbox.x <= 1) ? bbox.x : bbox.x / 100,
+            y: (typeof bbox.y === 'number' && bbox.y <= 1) ? bbox.y : bbox.y / 100,
+            w: (typeof bbox.w === 'number' && bbox.w <= 1) ? bbox.w : bbox.w / 100,
+            h: (typeof bbox.h === 'number' && bbox.h <= 1) ? bbox.h : bbox.h / 100,
+          };
+          
+          return {
+            id: `d${index + 1}`,
+            classId: pred.class_id.toString(),
+            label: pred.class_name || `Class ${pred.class_id}`,
+            color: legendItems.find(item => item.id === pred.class_id.toString())?.color || "#6b7280",
+            conf: pred.confidence,
+            box: normalizedBbox,
+            boxNormalized: normalizedBboxOriginal,
+            polygon: polygon,
+          };
+        });
+        
+        setDetections(formattedDetections);
+        setHiddenBoxIds([]);
+        showToast(`Analysis complete! Found ${formattedDetections.length} detections.`, "success");
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error("Analysis error:", error);
+      if (error.message.includes("connect") || error.message.includes("server")) {
+        showToast("Unable to connect to analysis server. Using demo data.", "warning", 6000);
+      } else {
+        showToast(error.message || "Analysis failed. Please try again.", "error");
+      }
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const visibleDetections = useMemo(
@@ -217,6 +434,8 @@ function AnalysisPage() {
 
   return (
     <main className={styles.page}>
+      {isAnalyzing && <AnalyzingOverlay label="Analyzing image..." />}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className={styles.layout}>
         {panelMode === "legend" ? (
           <Legend collapsed={!panelOpen} items={legendItems} />
@@ -227,6 +446,8 @@ function AnalysisPage() {
             onToggleBox={toggleBoxVisibility}
             onShowAll={showAllBoxes}
             onHideAll={hideAllBoxes}
+            onExport={exportToCSV}
+            imageName={name}
           />
         )}
 
